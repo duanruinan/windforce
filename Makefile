@@ -19,8 +19,6 @@ ALLBINS:
 	@/usr/bin/printf "\e[32mSpark: Building started ...\e[0m\n"
 	make -C tools
 	make -C boot
-	cp -f boot/mbr_hd images/
-	cp -f boot/mbr_hd.map images/
 	cp -f images/empty/$(DISKNAME) images/
 
 POSTSCRIPT:
