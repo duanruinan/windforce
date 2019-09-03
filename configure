@@ -24,9 +24,10 @@ if [ -f test.c ]; then
 	rm -f test.c
 fi
 cat >>test.c<<_ACEOF
+#include <stdio.h>
 int main(int argc, char **argv)
 {
-	return sizeof(unsigned long);
+	return sizeof(size_t);
 }
 _ACEOF
 gcc -o test test.c
