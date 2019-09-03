@@ -1,0 +1,122 @@
+#!/bin/sh
+
+# checking word length. 32bits or 64bits
+# CFLAGS += -m32 and LDFLAGS += -m elf_i386 for 64bits machine
+printf "\e[32m%-50s\e[0m\n" "Generating config.mk..."
+if [ -f config.mk ]; then
+	mv config.mk config.old
+fi
+
+echo "export DISKNAME = c.img" >> config.mk
+echo "export HOST = x86" >> config.mk
+echo "export TARGET = x86" >> config.mk
+printf "\e[32m%-50s\e[0m" "Checking host CPU..."
+if [ -f test.exe ]; then
+	rm -f test.exe
+fi
+if [ -f test ]; then
+	rm -f test
+fi
+if [ -f test.o ]; then
+	rm -f test.o
+fi
+if [ -f test.c ]; then
+	rm -f test.c
+fi
+cat >>test.c<<_ACEOF
+int main(int argc, char **argv)
+{
+	return sizeof(unsigned long);
+}
+_ACEOF
+gcc -o test test.c
+./test
+rt=$?
+if [ "${rt}" = "4" ]; then
+	printf "\e[33m%30s\e[0m\n" "[   32   ]"
+	echo "export CC = gcc" >> config.mk
+	echo "export LD = ld" >> config.mk
+elif [ "${rt}" = "8" ]; then
+	printf "\e[33m%30s\e[0m\n" "[   64   ]"
+	echo "export CC = gcc -m32" >> config.mk
+	echo "export LD = ld -m elf_i386" >> config.mk
+fi
+
+echo "export NM = nm" >> config.mk
+echo "export OBJCOPY = objcopy" >> config.mk
+
+# checking os windows or linux
+printf "\e[32m%-50s\e[0m" "Checking host OS..."
+if [ -f test.exe ]; then
+	rm -f test.exe
+fi
+if [ -f test ]; then
+	rm -f test
+fi
+if [ -f test.c ]; then
+	rm -f test.c
+fi
+cat >>test.c<<_ACEOF
+int main(int argc, char **argv)
+{
+#ifdef __linux__
+	return 1;
+#endif
+#ifdef _WIN32
+	return 0;
+#endif
+}
+_ACEOF
+gcc -o test test.c
+./test
+rt=$?
+if [ "${rt}" = "1" ]; then
+	printf "\e[33m%30s\e[0m" "[ GNU OS ]"
+	echo "export HOSTOS = GNU" >> config.mk
+elif [ "${rt}" = "0" ]; then
+	printf "\e[33m%30s\e[0m" "[ MS Win ]"
+	echo "export HOSTOS = WIN" >> config.mk
+fi
+
+if [ -f test.exe ]; then
+	rm -f test.exe
+fi
+if [ -f test ]; then
+	rm -f test
+fi
+if [ -f test.c ]; then
+	rm -f test.c
+fi
+
+# checking whether a "_" prefix before symbol
+printf "\n\e[32m%-50s\e[0m" "Checking whether asm symbol has \"_\" prefix..."
+cat >>test.c<<_ACEOF
+int test(int argc, char **argv)
+{
+	return 0;
+}
+_ACEOF
+gcc -c -o test.o test.c
+nm test.o | grep _test > /dev/null
+rt=$?
+if [ "${rt}" = "0" ]; then
+	printf "\e[33m%30s\e[0m" "[Have \"_\"]"
+else
+	printf "\e[33m%30s\e[0m" "[ No \"_\" ]"
+	echo "CFLAGS += -DNO_UNDERLINE" >> config.mk
+fi
+
+echo "CFLAGS += -fno-stack-protector" >> config.mk
+if [ -f test.o ]; then
+	rm -f test.o
+fi
+if [ -f test.c ]; then
+	rm -f test.c
+fi
+
+printf "\n\e[32m%-50s\e[0m\n" "Generating complete!"
+printf "\n\e[32m%s\e[0m\n" "config.mk as follows:"
+printf "\e[32m%s\e[0m\n" "================================================"
+cat config.mk
+printf "\e[32m%s\e[0m\n" "================================================"
+

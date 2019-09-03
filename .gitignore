@@ -1,0 +1,10 @@
+tags
+cscope.*
+*.swp
+*.o
+*.elf
+*.map
+config.mk
+config.old
+bochs.log
+

@@ -1,0 +1,24 @@
+###############################################################
+# bochsrc file for Spark.
+###############################################################
+
+# how much memory the emulated machine will have
+megs: 64
+
+# filename of ROM images
+romimage: file=$BXSHARE/BIOS-bochs-latest
+vgaromimage: file=$BXSHARE/VGABIOS-lgpl-latest
+
+# what disk images will be used 
+# floppya: 1_44=images/floppy.img, status=inserted
+
+# choose the boot disk.
+boot: c
+
+# where do we send log messages?
+log: bochs.log
+
+# cpu: count=1, ips=25000000
+
+ata0-master: type=disk, path=images/c.img, mode=flat
+
